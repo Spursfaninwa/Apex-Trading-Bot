@@ -25,6 +25,7 @@ from apex.portfolio.daily_limits import daily_trade_limit_reached
 from apex.analytics.performance_dashboard import show_performance_dashboard
 
 from apex.portfolio.portfolio_risk_manager import PortfolioRiskManager
+from apex.portfolio.portfolio_heat import portfolio_heat_limit_reached
 
 from apex.portfolio.cooldown_manager import (
     symbol_on_cooldown,
@@ -71,6 +72,15 @@ def main():
 
         log.info(
             "No new trades allowed today."
+        )
+
+    elif portfolio_heat_limit_reached(
+        strategy_capital=1000,
+        max_portfolio_risk_pct=0.05,
+    ):
+
+        log.info(
+            "No new trades allowed due to portfolio heat limits."
         )
 
     elif not portfolio_risk_manager.can_add_new_position(client):
