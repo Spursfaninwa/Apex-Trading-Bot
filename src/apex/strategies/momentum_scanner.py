@@ -1,9 +1,9 @@
 from apex.data.market_data import get_stock_bars
-from apex.strategies.signal_scoring import score_stock
-from apex.core.logger import logger
+from apex.core.logger import get_logger
+from apex.strategies.signal_scoring import score_momentum_candidate
 from apex.strategies.approved_symbols import APPROVED_SYMBOLS
 
-log = logger()
+log = get_logger()
 
 WATCHLIST = [
     "SPY",
@@ -19,73 +19,53 @@ WATCHLIST = [
 ]
 
 
-def scan_momentum_candidates(client):
-
+def scan_momentum_candidates():
     candidates = []
 
     for symbol in WATCHLIST:
-
         if symbol not in APPROVED_SYMBOLS:
-
-            log.info(
-                f"{symbol} skipped (not approved)."
-            )
-
+            log.info(f"{symbol} skipped (not approved).")
             continue
 
-        bars = get_stock_bars(
-            client,
-            symbol,
-            limit=82,
-        )
+        try:
+            df = get_stock_bars(symbol, days=120)
+            closes = df["close"]
 
-        if bars.empty:
-            continue
+            current_price = closes.iloc[-1]
+            sma_20 = closes.rolling(20).mean().iloc[-1]
+            sma_50 = closes.rolling(50).mean().iloc[-1]
 
-        score = score_stock(bars)
+            momentum_30d = ((current_price / closes.iloc[-30]) - 1) * 100
+            volatility = closes.pct_change().std() * 100
+            trend_strength = ((sma_20 / sma_50) - 1) * 100
 
-        latest_close = bars["close"].iloc[-1]
-        first_close = bars["close"].iloc[0]
+            bullish = current_price > sma_20 > sma_50
 
-        momentum_pct = (
-            (latest_close - first_close)
-            / first_close
-        ) * 100
+            if bullish:
+                candidate = {
+                    "symbol": symbol,
+                    "price": round(current_price, 2),
+                    "momentum_30d": round(momentum_30d, 2),
+                    "volatility": round(volatility, 2),
+                    "trend_strength": round(trend_strength, 2),
+                }
 
-        log.info(
-            f"{symbol} scored {score}"
-        )
+                candidate["score"] = score_momentum_candidate(candidate)
 
-        log.info(
-            f"{symbol} bullish momentum "
-            f"({momentum_pct:.2f}%)"
-        )
+                candidates.append(candidate)
 
-        candidates.append(
-            {
-                "symbol": symbol,
-                "score": score,
-                "price": latest_close,
-                "momentum_pct": momentum_pct,
-            }
-        )
+                log.info(
+                    f"{symbol} bullish momentum "
+                    f"({momentum_30d:.2f}%)"
+                )
+
+        except Exception as e:
+            log.error(f"{symbol} scan failed: {e}")
 
     candidates = sorted(
         candidates,
         key=lambda x: x["score"],
         reverse=True,
     )
-
-    log.info("Top Momentum Candidates:")
-
-    for candidate in candidates[:5]:
-
-        log.info(
-            f"{candidate['symbol']} | "
-            f"Price: ${candidate['price']:.2f} | "
-            f"Momentum: "
-            f"{candidate['momentum_pct']:.2f}% | "
-            f"Score: {candidate['score']}"
-        )
 
     return candidates
