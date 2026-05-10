@@ -4,6 +4,7 @@ from apex.core.config import load_config
 from apex.strategies.signal_scoring import score_momentum_candidate
 from apex.analytics.rejection_analytics import RejectionAnalytics
 from apex.monitoring.signal_memory import log_signal_candidates
+from apex.analytics.signal_persistence import persistence_bonus
 
 log = get_logger()
 
@@ -67,7 +68,12 @@ def scan_momentum_candidates():
                 "approved_for_trade": approved_for_trade,
             }
 
-            candidate["score"] = score_momentum_candidate(candidate)
+            base_score = score_momentum_candidate(candidate)
+            bonus = persistence_bonus(symbol)
+
+            candidate["score"] = base_score + bonus
+            candidate["base_score"] = base_score
+            candidate["persistence_bonus"] = bonus
 
             if candidate["score"] < 40:
                 rejection_analytics.record(symbol, "score_below_40")
@@ -117,7 +123,9 @@ def scan_momentum_candidates():
             f"{status} | "
             f"Price: ${candidate['price']} | "
             f"Momentum: {candidate['momentum_30d']}% | "
-            f"Score: {candidate['score']}"
+            f"Base Score: {candidate['base_score']} | "
+            f"Persistence: +{candidate['persistence_bonus']} | "
+            f"Final Score: {candidate['score']}"
         )
 
     log.info("====================================")
