@@ -20,6 +20,8 @@ from apex.monitoring.trade_journal import (
     log_trade_plan,
 )
 
+from apex.portfolio.daily_limits import daily_trade_limit_reached
+
 from apex.portfolio.cooldown_manager import (
     symbol_on_cooldown,
 )
@@ -57,7 +59,13 @@ def main():
             f"Score: {candidate['score']}"
         )
 
-    if candidates and regime != "RISK_OFF":
+    if daily_trade_limit_reached():
+
+        log.info(
+            "No new trades allowed today."
+        )
+
+    elif candidates and regime != "RISK_OFF":
 
         selected_candidate = None
 
