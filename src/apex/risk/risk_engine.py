@@ -45,7 +45,15 @@ class RiskEngine:
 
         capped_shares = max_position_value / entry_price
 
+        original_shares = shares
+
         shares = round(min(shares, capped_shares), 4)
+
+        if shares < original_shares:
+
+            log.info(
+                "Position capped by max position sizing rules."
+            )
 
         position_value = shares * entry_price
         dollar_risk = shares * risk_per_share
