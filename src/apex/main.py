@@ -17,6 +17,8 @@ from apex.portfolio.daily_limits import daily_trade_limit_reached
 from apex.portfolio.portfolio_risk_manager import PortfolioRiskManager
 from apex.portfolio.portfolio_heat import portfolio_heat_limit_reached
 from apex.portfolio.cooldown_manager import symbol_on_cooldown
+from apex.portfolio.position_manager import get_open_positions
+from apex.portfolio.correlation_filter import correlation_blocked
 
 from apex.monitoring.trade_journal import log_trade_plan
 from apex.analytics.performance_dashboard import show_performance_dashboard
@@ -82,11 +84,18 @@ def main():
 
     elif candidates and regime != "RISK_OFF":
         selected_candidate = None
+        open_symbols = get_open_positions(client)
 
         for candidate in candidates:
             if symbol_on_cooldown(candidate["symbol"]):
                 log.info(
                     f"{candidate['symbol']} skipped due to cooldown."
+                )
+                continue
+
+            if correlation_blocked(candidate["symbol"], open_symbols):
+                log.info(
+                    f"{candidate['symbol']} skipped due to correlation."
                 )
                 continue
 
