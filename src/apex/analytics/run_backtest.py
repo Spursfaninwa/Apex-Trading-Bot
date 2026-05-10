@@ -1,5 +1,6 @@
 from apex.data.market_data import get_stock_bars
 from apex.analytics.backtester import run_momentum_backtest
+from apex.analytics.equity_curve import save_equity_curve
 
 WATCHLIST = [
     "SPY",
@@ -16,13 +17,10 @@ WATCHLIST = [
 
 
 def main():
-
     results = []
 
     for symbol in WATCHLIST:
-
         try:
-
             df = get_stock_bars(symbol, days=365)
 
             result = run_momentum_backtest(
@@ -30,10 +28,14 @@ def main():
                 df,
             )
 
+            save_equity_curve(
+                result.symbol,
+                result.equity_curve,
+            )
+
             results.append(result)
 
         except Exception as e:
-
             print(f"{symbol} failed: {e}")
 
     print("\n===== STRATEGY RANKINGS =====")
@@ -45,7 +47,6 @@ def main():
     )
 
     for r in ranked:
-
         print(
             f"{r.symbol} | "
             f"Return: {r.total_return_pct:.2f}% | "
@@ -54,6 +55,7 @@ def main():
         )
 
     print("=============================")
+    print("Equity curves saved in reports/")
 
 
 if __name__ == "__main__":

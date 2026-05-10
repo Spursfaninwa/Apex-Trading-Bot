@@ -17,6 +17,7 @@ class BacktestResult:
     win_rate: float
     total_return_pct: float
     max_drawdown_pct: float
+    equity_curve: list[float]
 
 
 def run_momentum_backtest(
@@ -48,8 +49,6 @@ def run_momentum_backtest(
                 lookback = df.iloc[: i + 1]
                 atr = calculate_atr(lookback)
 
-                # Volatility filter:
-                # skip entries where ATR is more than 8% of price.
                 if atr / price > 0.08:
                     continue
 
@@ -63,7 +62,6 @@ def run_momentum_backtest(
                     continue
 
                 shares = risk_amount / risk_per_share
-
                 position_value = shares * entry_price
 
                 if position_value > cash:
@@ -73,10 +71,7 @@ def run_momentum_backtest(
                 in_position = True
 
         else:
-            exit_signal = (
-                price <= stop_price
-                or price < row["sma20"]
-            )
+            exit_signal = price <= stop_price or price < row["sma20"]
 
             if exit_signal:
                 cash += shares * price
@@ -86,13 +81,14 @@ def run_momentum_backtest(
                 shares = 0
 
         equity = cash + (shares * price if in_position else 0)
-        equity_curve.append(equity)
+        equity_curve.append(float(equity))
 
     if in_position:
         final_price = df.iloc[-1]["close"]
         cash += shares * final_price
         pnl = (final_price - entry_price) * shares
         trades.append(pnl)
+        equity_curve.append(float(cash))
 
     equity_series = pd.Series(equity_curve)
 
@@ -117,6 +113,7 @@ def run_momentum_backtest(
         win_rate=win_rate,
         total_return_pct=total_return_pct,
         max_drawdown_pct=max_drawdown_pct,
+        equity_curve=equity_curve,
     )
 
     log.info("===== BACKTEST RESULT =====")

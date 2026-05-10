@@ -24,6 +24,8 @@ from apex.portfolio.daily_limits import daily_trade_limit_reached
 
 from apex.analytics.performance_dashboard import show_performance_dashboard
 
+from apex.portfolio.portfolio_risk_manager import PortfolioRiskManager
+
 from apex.portfolio.cooldown_manager import (
     symbol_on_cooldown,
 )
@@ -48,6 +50,10 @@ def main():
         risk_per_trade=0.01,
     )
 
+    portfolio_risk_manager = PortfolioRiskManager(
+        max_open_positions=5,
+    )
+
     candidates = scan_momentum_candidates()
 
     log.info("Top Momentum Candidates:")
@@ -65,6 +71,12 @@ def main():
 
         log.info(
             "No new trades allowed today."
+        )
+
+    elif not portfolio_risk_manager.can_add_new_position(client):
+
+        log.info(
+            "No new trades allowed due to portfolio risk limits."
         )
 
     elif candidates and regime != "RISK_OFF":
