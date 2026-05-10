@@ -1,5 +1,9 @@
 from apex.core.logger import get_logger
 from apex.core.config import load_config
+from apex.core.market_clock import (
+    get_market_clock_summary,
+    is_market_open,
+)
 
 from apex.execution.alpaca_client import create_trading_client
 from apex.execution.order_executor import submit_paper_order
@@ -33,6 +37,7 @@ def main():
 
     config = load_config()
     log.info(f"Execution mode: {config['execution']['mode']}")
+    log.info(get_market_clock_summary())
 
     client = create_trading_client()
 
@@ -69,7 +74,11 @@ def main():
             f"Score: {candidate['score']}"
         )
 
-    if not regime_signal.allow_new_positions:
+    if not is_market_open():
+        log.info("Market is closed by Eastern market clock.")
+        log.info("No new paper orders will be placed.")
+
+    elif not regime_signal.allow_new_positions:
         log.info("No new trades allowed by regime signal.")
 
     elif daily_trade_limit_reached():
