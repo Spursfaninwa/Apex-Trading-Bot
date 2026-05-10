@@ -1,7 +1,7 @@
 from apex.data.market_data import get_stock_bars
 from apex.core.logger import get_logger
+from apex.core.config import load_config
 from apex.strategies.signal_scoring import score_momentum_candidate
-from apex.strategies.approved_symbols import APPROVED_SYMBOLS
 
 log = get_logger()
 
@@ -20,10 +20,13 @@ WATCHLIST = [
 
 
 def scan_momentum_candidates():
+    config = load_config()
+    approved_symbols = config["scanner"]["approved_symbols"]
+
     candidates = []
 
     for symbol in WATCHLIST:
-        if symbol not in APPROVED_SYMBOLS:
+        if symbol not in approved_symbols:
             log.info(f"{symbol} skipped (not approved).")
             continue
 
@@ -51,7 +54,6 @@ def scan_momentum_candidates():
                 }
 
                 candidate["score"] = score_momentum_candidate(candidate)
-
                 candidates.append(candidate)
 
                 log.info(
