@@ -26,12 +26,16 @@ def scan_momentum_candidates():
 
     rejection_analytics = RejectionAnalytics()
     candidates = []
+    research_candidates = []
 
     for symbol in WATCHLIST:
-        if symbol not in approved_symbols:
-            log.info(f"{symbol} skipped (not approved).")
-            rejection_analytics.record(symbol, "not_approved")
-            continue
+        approved_for_trade = symbol in approved_symbols
+
+        if not approved_for_trade:
+            log.info(
+                f"{symbol} research-only scan "
+                f"(not approved for trading)."
+            )
 
         try:
             df = get_stock_bars(symbol, days=120)
@@ -59,6 +63,7 @@ def scan_momentum_candidates():
                 "momentum_30d": round(momentum_30d, 2),
                 "volatility": round(volatility, 2),
                 "trend_strength": round(trend_strength, 2),
+                "approved_for_trade": approved_for_trade,
             }
 
             candidate["score"] = score_momentum_candidate(candidate)
@@ -67,12 +72,19 @@ def scan_momentum_candidates():
                 rejection_analytics.record(symbol, "score_below_40")
                 continue
 
-            candidates.append(candidate)
+            research_candidates.append(candidate)
 
-            log.info(
-                f"{symbol} bullish momentum "
-                f"({momentum_30d:.2f}%)"
-            )
+            if approved_for_trade:
+                candidates.append(candidate)
+                log.info(
+                    f"{symbol} approved bullish momentum "
+                    f"({momentum_30d:.2f}%)"
+                )
+            else:
+                log.info(
+                    f"{symbol} research-only bullish momentum "
+                    f"({momentum_30d:.2f}%)"
+                )
 
         except Exception as e:
             log.error(f"{symbol} scan failed: {e}")
@@ -83,6 +95,31 @@ def scan_momentum_candidates():
         key=lambda x: x["score"],
         reverse=True,
     )
+
+    research_candidates = sorted(
+        research_candidates,
+        key=lambda x: x["score"],
+        reverse=True,
+    )
+
+    log.info("===== RESEARCH MODE CANDIDATES =====")
+
+    for candidate in research_candidates[:10]:
+        status = (
+            "TRADE_APPROVED"
+            if candidate["approved_for_trade"]
+            else "RESEARCH_ONLY"
+        )
+
+        log.info(
+            f"{candidate['symbol']} | "
+            f"{status} | "
+            f"Price: ${candidate['price']} | "
+            f"Momentum: {candidate['momentum_30d']}% | "
+            f"Score: {candidate['score']}"
+        )
+
+    log.info("====================================")
 
     rejection_analytics.report()
 
