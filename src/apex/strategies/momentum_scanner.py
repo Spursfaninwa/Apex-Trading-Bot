@@ -3,6 +3,7 @@ from apex.core.logger import get_logger
 from apex.core.config import load_config
 from apex.strategies.signal_scoring import score_momentum_candidate
 from apex.analytics.rejection_analytics import RejectionAnalytics
+from apex.monitoring.signal_memory import log_signal_candidates
 
 log = get_logger()
 
@@ -120,6 +121,8 @@ def scan_momentum_candidates():
         )
 
     log.info("====================================")
+
+    log_signal_candidates(research_candidates)
 
     rejection_analytics.report()
 
