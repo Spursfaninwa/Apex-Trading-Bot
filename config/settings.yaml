@@ -1,5 +1,5 @@
 execution:
-  mode: scan_only
+  mode: paper_trade
 
 risk:
   strategy_capital: 1000
