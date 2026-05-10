@@ -48,6 +48,11 @@ def run_momentum_backtest(
                 lookback = df.iloc[: i + 1]
                 atr = calculate_atr(lookback)
 
+                # Volatility filter:
+                # skip entries where ATR is more than 8% of price.
+                if atr / price > 0.08:
+                    continue
+
                 entry_price = price
                 stop_price = entry_price - (2 * atr)
 
