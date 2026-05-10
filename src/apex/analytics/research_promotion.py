@@ -3,6 +3,9 @@ from collections import Counter
 from pathlib import Path
 
 from apex.core.logger import get_logger
+from apex.analytics.promotion_governance import (
+    evaluate_promotion_candidate,
+)
 
 log = get_logger()
 
@@ -32,6 +35,8 @@ def analyze_research_promotions(
 
     recommendations = []
 
+    log.info("===== RESEARCH PROMOTION ENGINE =====")
+
     for symbol, count in appearances.items():
         scores = [
             float(row["score"])
@@ -42,25 +47,32 @@ def analyze_research_promotions(
         avg_score = sum(scores) / len(scores)
 
         if count >= min_appearances and avg_score >= min_average_score:
-            recommendations.append(
-                {
-                    "symbol": symbol,
-                    "appearances": count,
-                    "average_score": round(avg_score, 2),
-                }
+            governance = evaluate_promotion_candidate(
+                symbol=symbol,
+                appearances=count,
+                average_score=round(avg_score, 2),
             )
 
-    log.info("===== RESEARCH PROMOTION ENGINE =====")
+            recommendation = {
+                "symbol": symbol,
+                "appearances": count,
+                "average_score": round(avg_score, 2),
+                "governance_decision": governance["decision"],
+                "approved": governance["approved"],
+                "reasons": governance["reasons"],
+            }
+
+            recommendations.append(recommendation)
+
+            log.info(
+                f"PROMOTION CANDIDATE: {symbol} | "
+                f"Appearances: {count} | "
+                f"Avg Score: {round(avg_score, 2)} | "
+                f"Governance: {governance['decision']}"
+            )
 
     if not recommendations:
         log.info("No research-only symbols qualify for promotion yet.")
-    else:
-        for rec in recommendations:
-            log.info(
-                f"PROMOTION CANDIDATE: {rec['symbol']} | "
-                f"Appearances: {rec['appearances']} | "
-                f"Avg Score: {rec['average_score']}"
-            )
 
     log.info("=====================================")
 
