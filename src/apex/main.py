@@ -22,6 +22,8 @@ from apex.monitoring.trade_journal import (
 
 from apex.portfolio.daily_limits import daily_trade_limit_reached
 
+from apex.analytics.performance_dashboard import show_performance_dashboard
+
 from apex.portfolio.cooldown_manager import (
     symbol_on_cooldown,
 )
@@ -115,6 +117,8 @@ def main():
         )
 
     log.info(f"Active regime: {regime}")
+
+    show_performance_dashboard()
 
     log.info("System initialized successfully.")
 
