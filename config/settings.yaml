@@ -1,0 +1,21 @@
+trading:
+  mode: paper
+  max_positions: 5
+  risk_per_trade: 0.01
+  max_daily_drawdown: 0.03
+
+broker:
+  provider: alpaca
+
+strategies:
+  momentum: true
+  mean_reversion: true
+  volatility_expansion: true
+  relative_strength: true
+
+regime:
+  enabled: true
+
+
+execution:
+  mode: scan_only

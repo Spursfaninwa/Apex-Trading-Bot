@@ -1,0 +1,12 @@
+alpaca-py
+pandas
+numpy
+pydantic
+pyyaml
+python-dotenv
+httpx
+loguru
+ta
+scikit-learn
+fastapi
+uvicorn

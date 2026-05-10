@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: apex-trading-bot
+Version: 0.1.0
+Summary: Systematic cloud-native trading framework
+Author: Geoff Simons
+Requires-Python: >=3.11
+Requires-Dist: alpaca-py
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: pydantic
+Requires-Dist: pyyaml
+Requires-Dist: python-dotenv
+Requires-Dist: httpx
+Requires-Dist: loguru
+Requires-Dist: ta
+Requires-Dist: scikit-learn
+Requires-Dist: fastapi
+Requires-Dist: uvicorn

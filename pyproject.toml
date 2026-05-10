@@ -1,0 +1,30 @@
+[project]
+name = "apex-trading-bot"
+version = "0.1.0"
+description = "Systematic cloud-native trading framework"
+authors = [
+    {name = "Geoff Simons"}
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "alpaca-py",
+    "pandas",
+    "numpy",
+    "pydantic",
+    "pyyaml",
+    "python-dotenv",
+    "httpx",
+    "loguru",
+    "ta",
+    "scikit-learn",
+    "fastapi",
+    "uvicorn",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
