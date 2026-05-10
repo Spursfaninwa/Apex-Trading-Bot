@@ -2,6 +2,7 @@ from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 
 from apex.execution.execution_guard import can_place_orders
+from apex.portfolio.position_manager import already_holding_symbol
 from apex.core.logger import get_logger
 
 log = get_logger()
@@ -14,6 +15,12 @@ def submit_paper_order(client, config, trade_plan):
 
     if not trade_plan.approved:
         log.info("Order blocked: trade plan not approved.")
+        return None
+
+    if already_holding_symbol(client, trade_plan.symbol):
+        log.info(
+            f"Order blocked: already holding {trade_plan.symbol}"
+        )
         return None
 
     order = MarketOrderRequest(
