@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from apex.risk.risk_engine import RiskEngine
+from apex.data.market_data import get_stock_bars
+from apex.analytics.indicators import calculate_atr
 from apex.core.logger import get_logger
 
 log = get_logger()
@@ -11,7 +13,8 @@ class TradePlan:
     symbol: str
     entry_price: float
     stop_price: float
-    shares: int
+    atr: float
+    shares: float
     position_value: float
     dollar_risk: float
     approved: bool
@@ -23,7 +26,10 @@ def create_trade_plan(candidate, risk_engine: RiskEngine) -> TradePlan:
     entry_price = float(candidate["price"])
     score = float(candidate["score"])
 
-    stop_price = round(entry_price * 0.95, 2)
+    df = get_stock_bars(symbol, days=120)
+    atr = calculate_atr(df)
+
+    stop_price = round(entry_price - (2 * atr), 2)
 
     sizing = risk_engine.calculate_position_size(
         entry_price=entry_price,
@@ -45,6 +51,7 @@ def create_trade_plan(candidate, risk_engine: RiskEngine) -> TradePlan:
         symbol=symbol,
         entry_price=entry_price,
         stop_price=stop_price,
+        atr=atr,
         shares=sizing.shares,
         position_value=sizing.position_value,
         dollar_risk=sizing.dollar_risk,
@@ -55,8 +62,9 @@ def create_trade_plan(candidate, risk_engine: RiskEngine) -> TradePlan:
     log.info("Trade Plan:")
     log.info(f"Symbol: {plan.symbol}")
     log.info(f"Entry: ${plan.entry_price:.2f}")
+    log.info(f"ATR: ${plan.atr:.2f}")
     log.info(f"Stop: ${plan.stop_price:.2f}")
-    log.info(f"Shares: {plan.shares}")
+    log.info(f"Shares: {plan.shares:.4f}")
     log.info(f"Position Value: ${plan.position_value:.2f}")
     log.info(f"Dollar Risk: ${plan.dollar_risk:.2f}")
     log.info(f"Decision: {plan.reason}")
