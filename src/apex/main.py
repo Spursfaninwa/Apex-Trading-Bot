@@ -6,6 +6,7 @@ from apex.risk.risk_engine import RiskEngine
 from apex.strategies.momentum_scanner import scan_momentum_candidates
 from apex.portfolio.trade_planner import create_trade_plan
 from apex.execution.order_executor import submit_paper_order
+from apex.monitoring.trade_journal import log_trade_plan
 
 log = get_logger()
 
@@ -39,6 +40,9 @@ def main():
 
     if candidates and regime != "RISK_OFF":
         trade_plan = create_trade_plan(candidates[0], risk_engine)
+
+        log_trade_plan(trade_plan)
+
         submit_paper_order(client, config, trade_plan)
     else:
         log.info("No trade plan created.")
