@@ -47,12 +47,12 @@ def main():
     regime = classify_market_regime()
 
     risk_engine = RiskEngine(
-        strategy_capital=1000,
-        risk_per_trade=0.01,
+        strategy_capital=config["risk"]["strategy_capital"],
+        risk_per_trade=config["risk"]["risk_per_trade"],
     )
 
     portfolio_risk_manager = PortfolioRiskManager(
-        max_open_positions=5,
+        max_open_positions=config["risk"]["max_open_positions"],
     )
 
     candidates = scan_momentum_candidates()
@@ -75,8 +75,8 @@ def main():
         )
 
     elif portfolio_heat_limit_reached(
-        strategy_capital=1000,
-        max_portfolio_risk_pct=0.05,
+        strategy_capital=config["risk"]["strategy_capital"],
+        max_portfolio_risk_pct=config["risk"]["max_portfolio_risk_pct"],
     ):
 
         log.info(

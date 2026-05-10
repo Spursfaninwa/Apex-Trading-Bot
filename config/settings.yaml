@@ -1,21 +1,21 @@
-trading:
-  mode: paper
-  max_positions: 5
-  risk_per_trade: 0.01
-  max_daily_drawdown: 0.03
-
-broker:
-  provider: alpaca
-
-strategies:
-  momentum: true
-  mean_reversion: true
-  volatility_expansion: true
-  relative_strength: true
-
-regime:
-  enabled: true
-
-
 execution:
   mode: scan_only
+
+risk:
+  strategy_capital: 1000
+  risk_per_trade: 0.01
+  max_portfolio_risk_pct: 0.05
+  max_open_positions: 5
+  max_daily_trades: 3
+
+strategy:
+  atr_multiplier: 2.0
+  volatility_filter: 0.08
+  cooldown_hours: 24
+
+scanner:
+  approved_symbols:
+    - QQQ
+    - GOOGL
+    - AMD
+    - AAPL
