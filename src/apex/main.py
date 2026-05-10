@@ -23,6 +23,7 @@ from apex.portfolio.sector_exposure import sector_exposure_blocked
 
 from apex.monitoring.trade_journal import log_trade_plan
 from apex.analytics.performance_dashboard import show_performance_dashboard
+from apex.analytics.research_promotion import analyze_research_promotions
 
 log = get_logger()
 
@@ -133,6 +134,8 @@ def main():
     log.info(f"Active regime: {regime}")
 
     show_performance_dashboard()
+
+    analyze_research_promotions()
 
     log.info("System initialized successfully.")
 
