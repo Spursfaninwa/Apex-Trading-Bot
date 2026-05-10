@@ -40,7 +40,7 @@ def main():
 
     config = load_config()
 
-    log.info(f"Execution mode: {config.execution.mode}")
+    log.info(f"Execution mode: {config["execution"]["mode"]}")
 
     client = create_trading_client()
 
