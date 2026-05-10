@@ -19,6 +19,7 @@ from apex.portfolio.portfolio_heat import portfolio_heat_limit_reached
 from apex.portfolio.cooldown_manager import symbol_on_cooldown
 from apex.portfolio.position_manager import get_open_positions
 from apex.portfolio.correlation_filter import correlation_blocked
+from apex.portfolio.sector_exposure import sector_exposure_blocked
 
 from apex.monitoring.trade_journal import log_trade_plan
 from apex.analytics.performance_dashboard import show_performance_dashboard
@@ -96,6 +97,12 @@ def main():
             if correlation_blocked(candidate["symbol"], open_symbols):
                 log.info(
                     f"{candidate['symbol']} skipped due to correlation."
+                )
+                continue
+
+            if sector_exposure_blocked(candidate["symbol"], open_symbols):
+                log.info(
+                    f"{candidate['symbol']} skipped due to sector exposure."
                 )
                 continue
 
