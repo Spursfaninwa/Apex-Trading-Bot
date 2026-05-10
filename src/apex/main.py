@@ -7,6 +7,7 @@ from apex.strategies.momentum_scanner import scan_momentum_candidates
 from apex.portfolio.trade_planner import create_trade_plan
 from apex.execution.order_executor import submit_paper_order
 from apex.monitoring.trade_journal import log_trade_plan
+from apex.portfolio.cooldown_manager import symbol_on_cooldown
 
 log = get_logger()
 
@@ -39,11 +40,28 @@ def main():
         )
 
     if candidates and regime != "RISK_OFF":
-        trade_plan = create_trade_plan(candidates[0], risk_engine)
+        top_candidate = candidates[0]
 
-        log_trade_plan(trade_plan)
+        if symbol_on_cooldown(top_candidate["symbol"]):
 
-        submit_paper_order(client, config, trade_plan)
+            log.info(
+                f"{top_candidate['symbol']} skipped due to cooldown."
+            )
+
+        else:
+
+            trade_plan = create_trade_plan(
+                top_candidate,
+                risk_engine,
+            )
+
+            log_trade_plan(trade_plan)
+
+            submit_paper_order(
+                client,
+                config,
+                trade_plan,
+            )
     else:
         log.info("No trade plan created.")
 
