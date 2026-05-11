@@ -9,9 +9,7 @@ from apex.execution.alpaca_client import create_trading_client
 from apex.execution.order_executor import submit_paper_order
 
 from apex.regime.regime_engine import classify_market_regime
-
 from apex.signals.regime_signals import build_regime_signal
-
 from apex.risk.risk_engine import RiskEngine
 
 from apex.strategies.momentum_scanner import scan_momentum_candidates
@@ -26,6 +24,8 @@ from apex.portfolio.correlation_filter import correlation_blocked
 from apex.portfolio.sector_exposure import sector_exposure_blocked
 
 from apex.monitoring.trade_journal import log_trade_plan
+
+from apex.analytics.account_snapshot import show_account_snapshot
 from apex.analytics.performance_dashboard import show_performance_dashboard
 from apex.analytics.research_promotion import analyze_research_promotions
 
@@ -36,19 +36,26 @@ def main():
     log.info("Apex Trading Bot starting...")
 
     config = load_config()
+
     log.info(f"Execution mode: {config['execution']['mode']}")
     log.info(get_market_clock_summary())
 
     client = create_trading_client()
+
+    show_account_snapshot(client)
 
     regime = classify_market_regime()
     regime_signal = build_regime_signal(regime)
 
     log.info(f"Regime risk multiplier: {regime_signal.risk_multiplier}")
     log.info(f"Regime max positions: {regime_signal.max_positions}")
-    log.info(f"Regime allows new positions: {regime_signal.allow_new_positions}")
+    log.info(
+        f"Regime allows new positions: "
+        f"{regime_signal.allow_new_positions}"
+    )
 
     base_risk_per_trade = config["risk"]["risk_per_trade"]
+
     adjusted_risk_per_trade = (
         base_risk_per_trade * regime_signal.risk_multiplier
     )
