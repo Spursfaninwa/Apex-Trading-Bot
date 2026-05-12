@@ -24,12 +24,31 @@ from apex.portfolio.correlation_filter import correlation_blocked
 from apex.portfolio.sector_exposure import sector_exposure_blocked
 
 from apex.monitoring.trade_journal import log_trade_plan
+from apex.monitoring.slack_notifier import (
+    notify_account_snapshot,
+    notify_market_closed,
+    send_slack_message,
+)
 
 from apex.analytics.account_snapshot import show_account_snapshot
 from apex.analytics.performance_dashboard import show_performance_dashboard
 from apex.analytics.research_promotion import analyze_research_promotions
 
 log = get_logger()
+
+
+def notify_order_if_submitted(order, trade_plan):
+    if not order:
+        return
+
+    send_slack_message(
+        ":rocket: *[APEX] Paper Order Submitted*\n"
+        f"Symbol: *{trade_plan.symbol}*\n"
+        f"Qty: {trade_plan.shares:.4f}\n"
+        f"Entry: ${trade_plan.entry_price:.2f}\n"
+        f"Risk: ${trade_plan.dollar_risk:.2f}\n"
+        f"Order ID: `{order.id}`"
+    )
 
 
 def main():
@@ -43,6 +62,16 @@ def main():
     client = create_trading_client()
 
     show_account_snapshot(client)
+
+    account = client.get_account()
+    positions = client.get_all_positions()
+    open_orders = client.get_orders()
+
+    notify_account_snapshot(
+        account,
+        positions,
+        open_orders,
+    )
 
     regime = classify_market_regime()
     regime_signal = build_regime_signal(regime)
@@ -84,6 +113,7 @@ def main():
     if not is_market_open():
         log.info("Market is closed by Eastern market clock.")
         log.info("No new paper orders will be placed.")
+        notify_market_closed()
 
     elif not regime_signal.allow_new_positions:
         log.info("No new trades allowed by regime signal.")
@@ -138,11 +168,13 @@ def main():
 
             log_trade_plan(trade_plan)
 
-            submit_paper_order(
+            order = submit_paper_order(
                 client,
                 config,
                 trade_plan,
             )
+
+            notify_order_if_submitted(order, trade_plan)
 
     else:
         log.info("No candidates available or market is risk off.")
