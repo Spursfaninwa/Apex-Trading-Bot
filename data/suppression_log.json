@@ -1,0 +1,13 @@
+{
+  "THETA_ENGINE:GOOGL:COVERED_CALL": {
+    "count": 2,
+    "first_seen": "2026-05-14T19:55:10.770414+00:00",
+    "last_reason": "Insufficient shares for covered call. Required 100, held 0.358.",
+    "last_seen": "2026-05-14T19:55:10.774038+00:00",
+    "severity": "LOG",
+    "signal_type": "COVERED_CALL",
+    "source": "THETA_ENGINE",
+    "status": "SUPPRESSED",
+    "symbol": "GOOGL"
+  }
+}

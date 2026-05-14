@@ -1,0 +1,53 @@
+{
+  "GOOGL": {
+    "confidence_score": null,
+    "entry_date": "2026-05-14T19:55:19.471855+00:00",
+    "entry_price": 389.704,
+    "entry_regime": null,
+    "entry_score": null,
+    "high_watermark": 400.72,
+    "initial_stop": null,
+    "intent": "Imported from live broker position",
+    "last_validated": "2026-05-14T19:55:19.471870+00:00",
+    "max_hold_days": 20,
+    "source": "BROKER_IMPORT",
+    "status": "OPEN",
+    "strategy": "legacy",
+    "symbol": "GOOGL",
+    "target_price": null
+  },
+  "SPY": {
+    "confidence_score": null,
+    "entry_date": "2026-05-14T19:55:19.471983+00:00",
+    "entry_price": 734.682,
+    "entry_regime": null,
+    "entry_score": null,
+    "high_watermark": 747.9803,
+    "initial_stop": null,
+    "intent": "Imported from live broker position",
+    "last_validated": "2026-05-14T19:55:19.471992+00:00",
+    "max_hold_days": 20,
+    "source": "BROKER_IMPORT",
+    "status": "OPEN",
+    "strategy": "legacy",
+    "symbol": "SPY",
+    "target_price": null
+  },
+  "WMT": {
+    "confidence_score": null,
+    "entry_date": "2026-05-14T19:55:19.472074+00:00",
+    "entry_price": 130.836436,
+    "entry_regime": null,
+    "entry_score": null,
+    "high_watermark": 132.225,
+    "initial_stop": null,
+    "intent": "Imported from live broker position",
+    "last_validated": "2026-05-14T19:55:19.472082+00:00",
+    "max_hold_days": 20,
+    "source": "BROKER_IMPORT",
+    "status": "OPEN",
+    "strategy": "legacy",
+    "symbol": "WMT",
+    "target_price": null
+  }
+}

@@ -22,6 +22,7 @@ from apex.portfolio.cooldown_manager import symbol_on_cooldown
 from apex.portfolio.position_manager import get_open_positions
 from apex.portfolio.correlation_filter import correlation_blocked
 from apex.portfolio.sector_exposure import sector_exposure_blocked
+from apex.portfolio.exit_manager import monitor_exit_signals
 
 from apex.monitoring.trade_journal import log_trade_plan
 from apex.monitoring.slack_notifier import (
@@ -51,6 +52,20 @@ def notify_order_if_submitted(order, trade_plan):
     )
 
 
+def notify_exit_signals(exit_signals):
+    for signal in exit_signals:
+        send_slack_message(
+            ":warning: *[APEX] Exit Signal Detected — Monitor Only*\n"
+            f"Symbol: *{signal.symbol}*\n"
+            f"Reason: {signal.reason.value}\n"
+            f"Qty: {signal.qty}\n"
+            f"Entry: ${signal.entry_price:.2f}\n"
+            f"Current: ${signal.current_price:.2f}\n"
+            f"P/L: ${signal.unrealized_pl:.2f} "
+            f"({signal.unrealized_plpc:.2%})"
+        )
+
+
 def main():
     log.info("Apex Trading Bot starting...")
 
@@ -75,6 +90,13 @@ def main():
 
     regime = classify_market_regime()
     regime_signal = build_regime_signal(regime)
+
+    exit_signals = monitor_exit_signals(
+        positions=positions,
+        regime=regime,
+    )
+
+    notify_exit_signals(exit_signals)
 
     log.info(f"Regime risk multiplier: {regime_signal.risk_multiplier}")
     log.info(f"Regime max positions: {regime_signal.max_positions}")
