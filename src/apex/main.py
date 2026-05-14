@@ -23,6 +23,14 @@ from apex.portfolio.position_manager import get_open_positions
 from apex.portfolio.correlation_filter import correlation_blocked
 from apex.portfolio.sector_exposure import sector_exposure_blocked
 from apex.portfolio.exit_manager import monitor_exit_signals
+from apex.portfolio.position_metadata import (
+    reconcile_position_metadata,
+    show_position_metadata_summary,
+)
+from apex.portfolio.position_metadata import (
+    reconcile_position_metadata,
+    show_position_metadata_summary,
+)
 
 from apex.monitoring.trade_journal import log_trade_plan
 from apex.monitoring.slack_notifier import (
@@ -87,6 +95,20 @@ def main():
         positions,
         open_orders,
     )
+
+    reconcile_position_metadata(
+        positions,
+        source="BROKER_IMPORT",
+    )
+
+    show_position_metadata_summary()
+
+    reconcile_position_metadata(
+        positions,
+        source="BROKER_IMPORT",
+    )
+
+    show_position_metadata_summary()
 
     regime = classify_market_regime()
     regime_signal = build_regime_signal(regime)
